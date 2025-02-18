@@ -26,23 +26,27 @@ void cmd_free(char** line) {
 }
 
 char* trim_white(char* line) {
-    char* newLine = strdup(line);
-    char* startLine = newLine;
-    char* endLine = newLine + strlen(newLine) - 1;
+    //create a pointer to the first character and last character
+    char* startLine = line;
+    char* endLine = line + strlen(line) - 1;
+
+    //counters for offset (number of spaces)
     size_t startOffset = 0;
     size_t endOffset = 0;
+
     //calculate how many spaces in front and rear
     while (*(startLine++) == ' ' && startLine != endLine) { startOffset++; }
-    while (*(endLine--) == ' ' && endLine != startLine) { endOffset++; }
+    while (*(endLine--) == ' ') { endOffset++; }
 
     //shift everything forward by startOffset
-    for (size_t i = startOffset; i < strlen(newLine); i++) {
-        newLine[i - startOffset] = newLine[i];
+    for (size_t i = startOffset; i < (strlen(line) - endOffset); i++) {
+        line[i - startOffset] = line[i];
     }
+
     //write the null terminator at the new end
-    *(newLine + strlen(newLine) - endOffset - startOffset) = '\0';
+    *(line + strlen(line) - endOffset - startOffset) = '\0';
     
-    return newLine;
+    return line;
 }
 
 bool do_builtin(struct shell* sh, char** argv) {
