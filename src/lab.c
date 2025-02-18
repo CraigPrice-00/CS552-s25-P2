@@ -26,8 +26,23 @@ void cmd_free(char** line) {
 }
 
 char* trim_white(char* line) {
-    UNUSED(line);
-    return NULL;
+    char* newLine = strdup(line);
+    char* startLine = newLine;
+    char* endLine = newLine + strlen(newLine) - 1;
+    size_t startOffset = 0;
+    size_t endOffset = 0;
+    //calculate how many spaces in front and rear
+    while (*(startLine++) == ' ' && startLine != endLine) { startOffset++; }
+    while (*(endLine--) == ' ' && endLine != startLine) { endOffset++; }
+
+    //shift everything forward by startOffset
+    for (size_t i = startOffset; i < strlen(newLine); i++) {
+        newLine[i - startOffset] = newLine[i];
+    }
+    //write the null terminator at the new end
+    *(newLine + strlen(newLine) - endOffset - startOffset) = '\0';
+    
+    return newLine;
 }
 
 bool do_builtin(struct shell* sh, char** argv) {
