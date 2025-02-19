@@ -8,7 +8,7 @@
 char* get_prompt(const char* env) {
     char* prompt = getenv(env);
     if (prompt) { return prompt; }
-    else { return "<SASH (Shitty Ass SHell)> " ; }
+    else { return "CS552 Shell> " ; }
 }
 
 int change_dir(char** dir) {
@@ -36,7 +36,11 @@ char* trim_white(char* line) {
 
     //calculate how many spaces in front and rear
     while (*(startLine++) == ' ' && startLine != endLine) { startOffset++; }
-    while (*(endLine--) == ' ') { endOffset++; }
+    if (startLine == endLine) { 
+        line[0] = '\0';
+        return line;
+     }
+    while (*(endLine--) == ' ' && endLine != startLine - 1) { endOffset++; }
 
     //shift everything forward by startOffset
     for (size_t i = startOffset; i < (strlen(line) - endOffset); i++) {
