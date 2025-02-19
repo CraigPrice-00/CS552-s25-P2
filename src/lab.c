@@ -7,8 +7,11 @@
 
 char* get_prompt(const char* env) {
     char* prompt = getenv(env);
-    if (prompt) { return prompt; }
-    else { return "CS552 Shell> " ; }
+    if ( prompt == NULL) { 
+        prompt = "shell>" ;
+    }
+    char* returnValue = malloc(strlen(prompt) + 1);
+    return strcpy(returnValue, prompt);
 }
 
 int change_dir(char** dir) {
@@ -18,6 +21,10 @@ int change_dir(char** dir) {
 
 char** cmd_parse(char const* line) {
     UNUSED(line);
+    // long maxCommands = sysconf(_SC_ARG_MAX);
+    // printf("The maximum args is: %ld\n", maxCommands);
+    // char** args = calloc(maxCommands, sizeof(char*));
+    // args[0] = malloc(strlen(line) + 1);
     return NULL;
 }
 
