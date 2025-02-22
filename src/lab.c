@@ -48,7 +48,7 @@ char** cmd_parse(char const* line) {
             memcpy(args[argCount],startSubstr, endSubstr - startSubstr);
             args[argCount][endSubstr - startSubstr] = '\0';
             
-            //printf("ARG %ld: %s|\n", argCount, args[argCount]);
+            printf("ARG %ld: %s|\n", argCount, args[argCount]);
             
             argCount++;
             
@@ -110,8 +110,19 @@ char* trim_white(char* line) {
 
 bool do_builtin(struct shell* sh, char** argv) {
     UNUSED(sh);
-    UNUSED(argv);
-    return true;
+    if (!strcmp(argv[0],"exit")) {
+        printf("exit\n");
+        return true;
+    }
+    else if (!strcmp(argv[0],"cd")) {
+        printf("cd\n");
+        return true;
+    }
+    else if (!strcmp(argv[0],"history")) {
+        printf("history\n");
+        return true;
+    }
+    return false;
 }
 
 void sh_init(struct shell* sh) {
