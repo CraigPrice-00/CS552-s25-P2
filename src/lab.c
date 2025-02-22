@@ -11,7 +11,11 @@ char* get_prompt(const char* env) {
         prompt = "shell>" ;
     }
     char* returnValue = malloc(strlen(prompt) + 1);
-    return strcpy(returnValue, prompt);
+    if (!returnValue) { return NULL; }
+    strcpy(returnValue, prompt);
+    //I think environment variables would always be null terminated, but just in case:
+    returnValue[strlen(prompt) + 1] = '\0';
+    return returnValue;
 }
 
 int change_dir(char** dir) {
@@ -20,16 +24,52 @@ int change_dir(char** dir) {
 }
 
 char** cmd_parse(char const* line) {
-    UNUSED(line);
-    // long maxCommands = sysconf(_SC_ARG_MAX);
-    // printf("The maximum args is: %ld\n", maxCommands);
-    // char** args = calloc(maxCommands, sizeof(char*));
-    // args[0] = malloc(strlen(line) + 1);
-    return NULL;
+    // UNUSED(line);
+    //printf("The line is: %s >\n", line);
+    long maxCommands = sysconf(_SC_ARG_MAX);
+    //printf("The maximum args is: %ld\n", maxCommands);
+    char** args = calloc(maxCommands, sizeof(char*));
+    if (!args) { return NULL; }
+    
+    char* stringCopy = malloc(strlen(line) + 1);
+    if (!stringCopy) { return NULL; }
+
+    strcpy(stringCopy, line);
+    char* startSubstr = stringCopy;
+    char* endSubstr = stringCopy;
+    size_t argCount = 0;
+
+    while(*startSubstr != '\0') {
+        if (*endSubstr == ' ' || *endSubstr == '\0') {
+            //printf("arg #%ld start: %c\n", argCount, *startSubstr);
+            //printf("arg #%ld end: %c\n", argCount, *(endSubstr-1));
+            
+            args[argCount] = malloc(endSubstr - startSubstr + 1);
+            memcpy(args[argCount],startSubstr, endSubstr - startSubstr);
+            args[argCount][endSubstr - startSubstr] = '\0';
+            
+            //printf("ARG %ld: %s|\n", argCount, args[argCount]);
+            
+            argCount++;
+            
+            if (*endSubstr == '\0') { break; }
+
+            endSubstr++;
+            startSubstr = endSubstr;
+        }
+        endSubstr++;
+    }
+    //printf("There are %ld arguments\n", argCount);
+    free(stringCopy);
+    return args;
 }
 
 void cmd_free(char** line) {
-    UNUSED(line);
+    size_t i = 0;
+    while(line[i]) {
+        free(line[i++]);
+    }
+    free(line);
 }
 
 char* trim_white(char* line) {
@@ -37,17 +77,26 @@ char* trim_white(char* line) {
     char* startLine = line;
     char* endLine = line + strlen(line) - 1;
 
+    //printf("the first character is: %c  >\n", startLine[0]);
+    //printf("the last character is: %c  >\n", endLine[0]);
     //counters for offset (number of spaces)
     size_t startOffset = 0;
     size_t endOffset = 0;
 
     //calculate how many spaces in front and rear
-    while (*(startLine++) == ' ' && startLine != endLine) { startOffset++; }
-    if (startLine == endLine) { 
+    while (*(startLine) == ' ' && startLine != endLine) { 
+        startLine++;
+        startOffset++; }
+    //printf("the first non-space character is: %c  >\n", startLine[0]);
+    //printf("the last non-space character is: %c  >\n", endLine[0]);
+    //check if startLine made it all the way to the end, meaning only spaces
+    if (*startLine == '\0') { 
         line[0] = '\0';
         return line;
      }
-    while (*(endLine--) == ' ' && endLine != startLine - 1) { endOffset++; }
+    while (*(endLine) == ' ' && endLine != startLine - 1) { 
+        endLine--;
+        endOffset++; }
 
     //shift everything forward by startOffset
     for (size_t i = startOffset; i < (strlen(line) - endOffset); i++) {
@@ -56,7 +105,6 @@ char* trim_white(char* line) {
 
     //write the null terminator at the new end
     *(line + strlen(line) - endOffset - startOffset) = '\0';
-    
     return line;
 }
 
@@ -98,7 +146,7 @@ void sh_init(struct shell* sh) {
 }
 
 void sh_destroy(struct shell* sh) {
-    UNUSED(sh);
+    free(sh->prompt);
 }
 
 void parse_args(int argc, char** argv) {

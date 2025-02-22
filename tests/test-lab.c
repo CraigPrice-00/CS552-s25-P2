@@ -35,6 +35,8 @@ void test_cmd_parse2(void)
      free(expected[0]);
      free(expected[1]);
      free(expected);
+     free(stng);
+     cmd_free(actual);
 }
 
 void test_cmd_parse(void)
@@ -161,8 +163,8 @@ void test_ch_dir_root(void)
 
 int main(void) {
   UNITY_BEGIN();
-  //RUN_TEST(test_cmd_parse);
-  //RUN_TEST(test_cmd_parse2);
+  RUN_TEST(test_cmd_parse);
+  RUN_TEST(test_cmd_parse2);
   RUN_TEST(test_trim_white_no_whitespace);
   RUN_TEST(test_trim_white_start_whitespace);
   RUN_TEST(test_trim_white_end_whitespace);
