@@ -14,7 +14,7 @@ char* get_prompt(const char* env) {
     if (!returnValue) { return NULL; }
     strcpy(returnValue, prompt);
     //I think environment variables would always be null terminated, but just in case:
-    returnValue[strlen(prompt) + 1] = '\0';
+    returnValue[strlen(prompt)] = '\0';
     return returnValue;
 }
 
