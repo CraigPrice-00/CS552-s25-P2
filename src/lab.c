@@ -48,7 +48,7 @@ char** cmd_parse(char const* line) {
             memcpy(args[argCount],startSubstr, endSubstr - startSubstr);
             args[argCount][endSubstr - startSubstr] = '\0';
             
-            printf("ARG %ld: %s|\n", argCount, args[argCount]);
+            //printf("ARG %ld: %s|\n", argCount, args[argCount]);
             
             argCount++;
             
@@ -111,8 +111,8 @@ char* trim_white(char* line) {
 bool do_builtin(struct shell* sh, char** argv) {
     UNUSED(sh);
     if (!strcmp(argv[0],"exit")) {
-        printf("exit\n");
-        return true;
+        printf("Shell exited successfully\n");
+        exit(0);
     }
     else if (!strcmp(argv[0],"cd")) {
         printf("cd\n");
@@ -133,6 +133,12 @@ void sh_init(struct shell* sh) {
     sh->shell_terminal = STDIN_FILENO;
     sh->shell_is_interactive = isatty(sh->shell_terminal);
 
+    //set signals to ignore
+    signal(SIGINT, SIG_IGN);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTTOU, SIG_IGN);
     
     if (sh->shell_is_interactive) {
         //check shell's process group
