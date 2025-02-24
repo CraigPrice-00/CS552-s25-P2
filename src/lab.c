@@ -53,9 +53,9 @@ char** cmd_parse(char const* line) {
             argCount++;
             
             if (*endSubstr == '\0') { break; }
-
             endSubstr++;
             startSubstr = endSubstr;
+            continue;
         }
         endSubstr++;
     }
@@ -111,6 +111,9 @@ char* trim_white(char* line) {
 bool do_builtin(struct shell* sh, char** argv) {
     UNUSED(sh);
     if (!strcmp(argv[0],"exit")) {
+        //free the things we have allocated
+        sh_destroy(sh);
+        cmd_free(argv);
         printf("Shell exited successfully\n");
         exit(0);
     }
