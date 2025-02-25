@@ -4,23 +4,57 @@
 #include <signal.h>
 #include <getopt.h>
 #include <string.h>
+#include <readline/history.h>
+#include <pwd.h>
+#include <errno.h>
 
 char* get_prompt(const char* env) {
     char* prompt = getenv(env);
     if ( prompt == NULL) { 
-        prompt = "shell>" ;
+        prompt = "shell>";
     }
-    char* returnValue = malloc(strlen(prompt) + 1);
+    //limit prompt to 50 chars
+    char* returnValue = calloc(51, sizeof(char));
     if (!returnValue) { return NULL; }
-    strcpy(returnValue, prompt);
-    //I think environment variables would always be null terminated, but just in case:
-    returnValue[strlen(prompt)] = '\0';
+    strncpy(returnValue, prompt, 50);
+    returnValue[50] = '\0';
     return returnValue;
 }
 
 int change_dir(char** dir) {
-    UNUSED(dir);
-    return -1;
+    if (!dir) {
+        fprintf(stderr, "NULL pointer within cd\n");
+        return -1;
+    }
+    //make sure not too many arguments
+    if (dir[2]) {
+        fprintf(stderr, "Too many arguments for cd command\n");
+        return -1;
+    }
+    int result;
+    //see if there is a path or empty
+    if (!dir[1]) {
+        //no path, try to get home directory path from getenv
+        char* home = getenv("HOME");
+        //continue if it exist
+        if (home) {
+            result = chdir(home);
+        }
+        //otherwise fall back to getuid and getpwuid
+        else {
+            uid_t uid = getuid();
+            struct passwd* pass = getpwuid(uid);
+            result = chdir(pass->pw_dir);
+        }
+    }
+    //otherwise just change to the path
+    else {
+        result = chdir(dir[1]);
+    }
+    if (result) {
+        fprintf(stderr,"Error: %s\n", strerror(errno));
+    }
+    return result;
 }
 
 char** cmd_parse(char const* line) {
@@ -114,15 +148,27 @@ bool do_builtin(struct shell* sh, char** argv) {
         //free the things we have allocated
         sh_destroy(sh);
         cmd_free(argv);
+        clear_history();
         printf("Shell exited successfully\n");
         exit(0);
+        return true;
     }
     else if (!strcmp(argv[0],"cd")) {
-        printf("cd\n");
+        change_dir(argv);
         return true;
     }
     else if (!strcmp(argv[0],"history")) {
-        printf("history\n");
+        HIST_ENTRY** hist = history_list();
+        if (!hist) { 
+            fprintf(stderr, "Error retrieving history\n");
+            return true; }
+        size_t i = 0;
+        printf("\n--HISTORY--\n");
+        while(hist[i] != NULL) {
+            printf("%s\n", hist[i]->line);
+            i++;
+        }
+        printf("\n");
         return true;
     }
     return false;

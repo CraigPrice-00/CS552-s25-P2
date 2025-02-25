@@ -161,6 +161,19 @@ void test_ch_dir_root(void)
      cmd_free(cmd);
 }
 
+// test_get_prompt_long: this test is to check that get_prompt properly cuts and terminates an excessively long prompt
+void test_get_prompt_long(void) {
+     const char* prmpt = "MY_PROMPT";
+     if(setenv(prmpt,"111111111122222222223333333333444444444455555555556666666666",true)){
+          TEST_FAIL();
+     }
+     char *prompt = get_prompt(prmpt);
+     TEST_ASSERT_TRUE(strlen(prompt) == 50);
+     TEST_ASSERT_EQUAL_STRING(prompt, "11111111112222222222333333333344444444445555555555");
+     free(prompt);
+     unsetenv(prmpt);
+}
+
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_cmd_parse);
@@ -173,8 +186,9 @@ int main(void) {
   RUN_TEST(test_trim_white_all_whitespace);
   RUN_TEST(test_get_prompt_default);
   RUN_TEST(test_get_prompt_custom);
-  //RUN_TEST(test_ch_dir_home);
-  //RUN_TEST(test_ch_dir_root);
+  RUN_TEST(test_ch_dir_home);
+  RUN_TEST(test_ch_dir_root);
+  RUN_TEST(test_get_prompt_long);
 
   return UNITY_END();
 }
