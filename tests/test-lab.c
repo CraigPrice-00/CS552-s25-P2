@@ -161,6 +161,22 @@ void test_ch_dir_root(void)
      cmd_free(cmd);
 }
 
+//test_ch_dir_home_noenv: this test is to ensure ch_dir functions properly when the "HOME" environment variable is unset
+void test_ch_dir_home_noenv(void) {
+     char *line = (char*) calloc(10, sizeof(char));
+     strncpy(line, "cd", 10);
+     char **cmd = cmd_parse(line);
+     char *expected = getenv("HOME");
+     unsetenv("HOME");
+     change_dir(cmd);
+     char *actual = getcwd(NULL,0);
+     TEST_ASSERT_EQUAL_STRING(expected, actual);
+     setenv("HOME",expected,true);
+     free(line);
+     free(actual);
+     cmd_free(cmd);
+}
+
 // test_get_prompt_long: this test is to check that get_prompt properly cuts and terminates an excessively long prompt
 void test_get_prompt_long(void) {
      const char* prmpt = "MY_PROMPT";
@@ -172,6 +188,28 @@ void test_get_prompt_long(void) {
      TEST_ASSERT_EQUAL_STRING(prompt, "11111111112222222222333333333344444444445555555555");
      free(prompt);
      unsetenv(prmpt);
+}
+
+//test_trim_empty_string: this test is to ensure trim_white functions properly on an empty string
+void test_trim_empty_string(void)
+{
+     char *line = (char*) calloc(1, sizeof(char));
+     strncpy(line, "", 1);
+     char *rval = trim_white(line);
+     TEST_ASSERT_EQUAL_STRING("", rval);
+     free(line);
+}
+
+//test_cmd_parse_middle_spaces: this test is to ensure cmd_parse can handle spaces in between arguments
+void test_cmd_parse_middle_spaces(void) {
+     char **rval = cmd_parse("ls             -a               -l");
+     TEST_ASSERT_TRUE(rval);
+     TEST_ASSERT_EQUAL_STRING("ls", rval[0]);
+     TEST_ASSERT_EQUAL_STRING("-a", rval[1]);
+     TEST_ASSERT_EQUAL_STRING("-l", rval[2]);
+     TEST_ASSERT_EQUAL_STRING(NULL, rval[3]);
+     TEST_ASSERT_FALSE(rval[3]);
+     cmd_free(rval);
 }
 
 int main(void) {
@@ -188,7 +226,10 @@ int main(void) {
   RUN_TEST(test_get_prompt_custom);
   RUN_TEST(test_ch_dir_home);
   RUN_TEST(test_ch_dir_root);
+  RUN_TEST(test_ch_dir_home_noenv);
   RUN_TEST(test_get_prompt_long);
+  RUN_TEST(test_trim_empty_string);
+  RUN_TEST(test_cmd_parse_middle_spaces);
 
   return UNITY_END();
 }

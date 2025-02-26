@@ -7,10 +7,21 @@ Steps to configure, build, run, and test the project.
 ```bash
 make
 ```
-## Building Debug
+## Building the Debug version
 
 ```bash
 make debug
+```
+## To get the version of the shell after building
+
+```bash
+./myprogram -v
+```
+
+## To run the shell
+
+```bash
+./myprogram
 ```
 
 ## Testing
