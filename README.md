@@ -1,6 +1,6 @@
-# Makefile Project Template
+# CS552 Shell Project
 
-Steps to configure, build, run, and test the project.
+Steps to configure, build, run, and test the CS552 Shell project#2.
 
 ## Building
 
