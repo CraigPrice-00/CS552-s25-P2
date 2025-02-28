@@ -34,6 +34,9 @@ static void explain_waitpid(int status)
     }
 }
 
+/*CODE REVIEW:
+ * I added a printline if the command is not found. This is to help the user understand why the command is not working.
+ */
 int main(int argc, char *argv[])
 {
     parse_args(argc, argv);
@@ -67,6 +70,7 @@ int main(int argc, char *argv[])
                 signal(SIGTTIN, SIG_DFL);
                 signal(SIGTTOU, SIG_DFL);
                 execvp(cmd[0], cmd);
+                fprintf(stderr, "Error: command not found\n");
                 exit(EXIT_FAILURE);
             }
             else if (pid < 0)
